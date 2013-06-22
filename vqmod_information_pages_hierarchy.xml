@@ -1,0 +1,100 @@
+<modification>
+    <id>Information Pages Hierarchy</id>
+    <version>1.0.0</version>
+    <vqmver>2.1</vqmver>
+    <author><![CDATA[<a href="http://teslitsky.info">Dmitry Teslitsky</a>]]></author>
+    <file name="admin/language/russian/catalog/information.php">
+        <operation>
+            <search position="before"><![CDATA[$_['entry_layout']]]></search>
+            <add><![CDATA[$_['entry_position_header'] = 'Отображать в хедере:';$_['entry_parent'] = 'Родительская статья:';]]></add>
+        </operation>
+    </file>
+    <file name="admin/language/english/catalog/information.php">
+        <operation>
+            <search position="before"><![CDATA[$_['entry_layout']]]></search>
+            <add><![CDATA[$_['entry_position_header'] = 'Show in header:';$_['entry_parent'] = 'Parent page:';]]></add>
+        </operation>
+    </file>
+    <file name="admin/view/template/catalog/information_form.tpl">
+        <operation>
+            <search position="before"><![CDATA[<td><?php echo $entry_keyword; ?></td>]]></search>
+            <add><![CDATA[
+            <td><?php echo $entry_parent; ?></td>
+            <td>
+                <select name="parent">
+                    <option></option>
+                    <?php foreach ($parents as $parent): ?>
+                    <?php if ((int) $information_id === (int) $parent['id']) continue; ?>
+                    <?php if ((int) $parent_id === (int) $parent['id']) : ?>
+                    <option value="<?php echo $parent['id']; ?>" selected="selected"><?php echo $parent['name']; ?></option>
+                    <?php else : ?>
+                    <option value="<?php echo $parent['id']; ?>"><?php echo $parent['name']; ?></option>
+                    <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+            </td></tr><tr>
+            ]]></add>
+        </operation>
+        <operation>
+            <search position="before"><![CDATA[<td><?php echo $entry_bottom; ?></td>]]></search>
+            <add><![CDATA[
+            <td><?php echo $entry_position_header; ?></td>
+            <td><?php if ($position_header) { ?>
+                <input type="checkbox" name="position_header" value="1" checked="checked" />
+                <?php } else { ?>
+                <input type="checkbox" name="position_header" value="1" />
+                <?php } ?></td></tr><tr>
+            ]]></add>
+        </operation>
+    </file>
+    <file name="admin/controller/catalog/information.php">
+        <operation>
+            <search position="after"><![CDATA[$this->data['entry_layout'] = $this->language->get('entry_layout');]]></search>
+            <add><![CDATA[$this->data['entry_position_header'] = $this->language->get('entry_position_header');$this->data['entry_parent'] = $this->language->get('entry_parent');]]></add>
+        </operation>
+        <operation>
+            <search position="after"><![CDATA[$this->data['action'] = $this->url->link('catalog/information/update', 'token=' . $this->session->data['token'] . '&information_id=' . $this->request->get['information_id'] . $url, 'SSL');]]></search>
+            <add><![CDATA[$this->data['information_id'] = (int) $this->request->get['information_id'];]]></add>
+        </operation>
+        <operation>
+            <search position="before"><![CDATA[if (isset($this->request->post['bottom'])) {]]></search>
+            <add><![CDATA[
+            if (isset($this->request->post['position_header'])) {
+    		    $this->data['position_header'] = $this->request->post['position_header'];
+            } elseif (!empty($information_info)) {
+			    $this->data['position_header'] = $information_info['position_header'];
+		    } else {
+			    $this->data['position_header'] = 0;
+		    }
+		    if (isset($this->request->post['parent'])) {
+			    $this->data['parent_id'] = $this->request->post['parent'];
+            } elseif (!empty($information_info)) {
+			    $this->data['parent_id'] = $information_info['parent_id'];
+		    } else {
+			    $this->data['parent_id'] = 0;
+		    }
+            ]]></add>
+        </operation>
+        <operation>
+            <search position="before"><![CDATA[$this->data['layouts'] = $this->model_design_layout->getLayouts();]]></search>
+            <add><![CDATA[
+                $parents = array();
+                $informations = $this->model_catalog_information->getInformations();
+                foreach ($informations as $information) {
+                    $parents[] = array(
+                        'id' => (int) $information['information_id'],
+                        'name' => $information['title'],
+                        'parent_id' => $information['parent_id'],
+                    );
+                }
+                $this->data['parents'] = $parents;
+            ]]></add>
+        </operation>
+    </file>
+    <file name="admin/model/catalog/information.php">
+        <operation>
+            <search position="replace"><![CDATA[sort_order = '" . (int)$data['sort_order'] . "']]></search>
+            <add><![CDATA[sort_order = '" . (int)$data['sort_order'] . "', parent_id = '" . (int)$data['parent'] . "', position_header = '" . (isset($data['position_header']) ? (int)$data['position_header'] : 0) . "']]></add>
+        </operation>
+    </file>
+</modification>
