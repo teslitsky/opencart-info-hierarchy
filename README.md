@@ -11,8 +11,8 @@ How to install
 
 ```SQL
 ALTER TABLE `oc_information`
-ADD COLUMN `oc_parent_id` INT(10) NULL DEFAULT NULL AFTER `status`,
-ADD COLUMN `oc_position_header` TINYINT(1) NOT NULL DEFAULT '0' AFTER `parent_id`;
+ADD COLUMN `parent_id` INT(10) NULL DEFAULT NULL AFTER `status`,
+ADD COLUMN `position_header` TINYINT(1) NOT NULL DEFAULT '0' AFTER `parent_id`;
 ```
 License
 -------
