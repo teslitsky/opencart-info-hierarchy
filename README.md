@@ -14,6 +14,10 @@ ALTER TABLE `oc_information`
 ADD COLUMN `parent_id` INT(10) NULL DEFAULT NULL AFTER `status`,
 ADD COLUMN `position_header` TINYINT(1) NOT NULL DEFAULT '0' AFTER `parent_id`;
 ```
+
+* clear cache
+* that's all, you can see new fields in Catalog - Information
+
 License
 -------
 MIT: http://rem.mit-license.org
