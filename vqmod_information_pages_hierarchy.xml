@@ -97,4 +97,48 @@
             <add><![CDATA[sort_order = '" . (int)$data['sort_order'] . "', parent_id = '" . (int)$data['parent'] . "', position_header = '" . (isset($data['position_header']) ? (int)$data['position_header'] : 0) . "']]></add>
         </operation>
     </file>
+    <file name="catalog/model/catalog/information.php">
+        <operation>
+            <search position="before"><![CDATA[public function getInformation($information_id)]]></search>
+            <add><![CDATA[
+                public function getInfoTree($information_id) {
+                    $informations = $this->getInformations();
+                    $nodes = array();
+                    foreach ($informations as $information) {
+                        $nodes[(int)$information['information_id']] = $information;
+                    }
+
+                    $result = array();
+
+                    do {
+                        $result[] = $nodes[$information_id];
+                        $information_id = $nodes[$information_id]['parent_id'];
+                    } while ($information_id);
+
+                    return array_reverse($result);
+                }
+            ]]></add>
+        </operation>
+    </file>
+    <file name="catalog/controller/information/information.php">
+        <operation>
+            <search position="before" offset="2"><![CDATA['text'      => $information_info['title']]]></search>
+            <add><![CDATA[
+                $information_tree = $this->model_catalog_information->getInfoTree($information_id);
+                foreach ($information_tree as $node) {
+            ]]></add>
+        </operation>
+        <operation>
+            <search position="replace"><![CDATA[$this->url->link('information/information', 'information_id=' .  $information_id)]]></search>
+            <add><![CDATA[$this->url->link('information/information', 'information_id=' .  $node['information_id'])]]></add>
+        </operation>
+        <operation>
+            <search position="after" offset="4"><![CDATA['text'      => $information_info['title']]]></search>
+            <add><![CDATA[}]]></add>
+        </operation>
+        <operation>
+            <search position="replace"><![CDATA['text'      => $information_info['title']]]></search>
+            <add><![CDATA['text'      => $node['title']]]></add>
+        </operation>
+    </file>
 </modification>
